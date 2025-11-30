@@ -9,7 +9,7 @@ dotenv.config({ path: path.join(process.cwd(), '.env') });
 const app = express()
 const port = 5000
 
-// parser middleware
+// middleware (parser)
 app.use(express.json());
 // app.use(express.urlencoded());
 
@@ -52,19 +52,39 @@ const initDB = async () => {
 
 initDB();
 
+// home route
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!')
 })
 
-app.post('/data', (req: Request, res: Response) => {
+// post users route
+app.post('/users', async (req: Request, res: Response) => {
     console.log(req.body);
+    const { name, email } = req.body;
 
-    // parser middleware
-    app.use(express.json())
-    res.status(201).json({
-        success: true,
-        message: 'Data created successfully'
-    })
+    try {
+        const result = await pool.query(
+            `INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *`,
+            [name, email]
+        );
+
+        // console.log(result);
+        // console.log(result.rows[0]);
+
+        // res.send({ message: 'data inserted' })
+        res.status(201).json({
+            success: true,
+            data: result.rows[0],
+            message: 'Data created successfully'
+        })
+
+        // res.sendStatus(201);
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
 })
 
 // listening route
