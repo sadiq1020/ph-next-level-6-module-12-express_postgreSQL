@@ -57,7 +57,8 @@ app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!')
 })
 
-// post users route
+// CRUD with users
+// post method 
 app.post('/users', async (req: Request, res: Response) => {
     console.log(req.body);
     const { name, email } = req.body;
@@ -67,7 +68,6 @@ app.post('/users', async (req: Request, res: Response) => {
             `INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *`,
             [name, email]
         );
-
         // console.log(result);
         // console.log(result.rows[0]);
 
@@ -86,6 +86,49 @@ app.post('/users', async (req: Request, res: Response) => {
         })
     }
 })
+
+// get method for all users
+app.get('/users', async (req: Request, res: Response) => {
+    try {
+        const result = await pool.query(`SELECT * FROM users`);
+        res.status(200).json({
+            success: true,
+            data: result.rows,
+            message: 'User\'s Data fetched successfully'
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            detail: error
+        })
+    }
+});
+
+// get method for single user
+app.get('/users/:id', async (req: Request, res: Response) => {
+    try {
+        const result = await pool.query(`SELECT * FROM users WHERE id = $1`, [req.params.id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        } else
+            res.status(200).json({
+                success: true,
+                data: result.rows[0],
+                message: 'User data fetched successfully'
+            });
+
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        })
+    }
+});
 
 // listening route
 app.listen(port, () => {
