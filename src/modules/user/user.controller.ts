@@ -5,10 +5,10 @@ import { userService } from "./user.service";
 // create a new user
 const createUsers = async (req: Request, res: Response) => {
     // console.log(req.body);
-    const { name, email } = req.body;
+    // const { name, email, password } = req.body;
 
     try {
-        const result = await userService.createUser(name, email);
+        const result = await userService.createUser(req.body);
 
         res.status(201).json({
             success: true,

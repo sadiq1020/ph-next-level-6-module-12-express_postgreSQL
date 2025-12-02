@@ -1,6 +1,8 @@
 import { Request, Response, Router } from "express";
 import { pool } from "../../config/db";
 import { userController } from "./user.controller";
+import logger from "../../middleware/logger";
+import auth from "../../middleware/auth";
 
 const router = Router();
 
@@ -15,7 +17,7 @@ const router = Router();
 router.post("/", userController.createUsers)
 
 // get all users
-router.get('/', userController.getAllUsers)
+router.get('/', logger, auth("admin"), userController.getAllUsers)
 
 // get a single user
 router.get('/:id', userController.getSingleUser)
