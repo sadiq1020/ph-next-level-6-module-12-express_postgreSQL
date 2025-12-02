@@ -4,15 +4,12 @@ import { userService } from "./user.service";
 
 // create a new user
 const createUsers = async (req: Request, res: Response) => {
-    console.log(req.body);
+    // console.log(req.body);
     const { name, email } = req.body;
 
     try {
         const result = await userService.createUser(name, email);
-        // console.log(result);
-        // console.log(result.rows[0]);
 
-        // res.send({ message: 'data inserted' })
         res.status(201).json({
             success: true,
             data: result.rows[0],
@@ -46,8 +43,87 @@ const getAllUsers = async (req: Request, res: Response) => {
     }
 }
 
+// get a single user
+const getSingleUser = async (req: Request, res: Response) => {
+    try {
+        const result = await userService.getSingleUser(req.params.id as string); // type assertion or req.params.id! (bang sign also works)
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        } else
+            res.status(200).json({
+                success: true,
+                data: result.rows[0],
+                message: 'User data fetched successfully'
+            });
+
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        })
+    }
+}
+
+// update a user
+const updateUser = async (req: Request, res: Response) => {
+
+    const { name, email } = req.body;
+    try {
+        const result = await userService.updateUser(name, email, req.params.id!);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        } else
+            res.status(200).json({
+                success: true,
+                data: result.rows[0],
+                message: 'User data updated successfully'
+            });
+
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        })
+    }
+}
+
+// delete a user
+const deleteUser = async (req: Request, res: Response) => {
+    try {
+        const result = await userService.deleteUser(req.params.id!);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        } else
+            res.status(200).json({
+                success: true,
+                data: null,
+                message: 'User data deleted successfully'
+            });
+
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        })
+    }
+}
 
 export const userController = {
     createUsers,
-    getAllUsers
+    getAllUsers,
+    getSingleUser,
+    updateUser,
+    deleteUser
 }
